@@ -1,0 +1,21 @@
+common:
+- name: CI_COMMIT
+  data: 1def9a5fcead3e36c9b29fff7f05929a874d2512
+  mask: false
+- name: TAGS
+  data: 1,1.0,1.0.23
+  mask: true
+  description: |
+    You can write your description in here.
+- name: LONG_TEXT
+  data: |
+    { 
+        "key": "value"
+    }
+  mask: true
+repoSlugs:
+  your_group/your_repo:
+  - name: image_name
+    data: swr.xxx.com/company/image_name
+    description: |
+      Specify variables for a repo.
