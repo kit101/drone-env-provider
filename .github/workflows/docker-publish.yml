@@ -15,7 +15,6 @@ env:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -30,18 +29,17 @@ jobs:
 
     # Set up Golang
     - name: Set up Go
-      uses: actions/setup-go@v1
+      uses: actions/setup-go@v3
       with:
-        go-version: 1.23
+        go-version: 1.23.6
+        cache: true
 
     # Golang build artifacts
     - name: Build
       run: |
-        GOOS=linux
-        GOARCH=amd64 
-        go build -a -v -tags netgo -ldflags="-s -w -X main.version=${GITHUB_REF_NAME}.${GITHUB_SHA}" -o dist/linux/amd64/ext_envs ./cmd/server
-        GOARCH=arm64
-        go build -a -v -tags netgo -ldflags="-s -w -X main.version=${GITHUB_REF_NAME}.${GITHUB_SHA}" -o dist/linux/arm64/ext_envs ./cmd/server
+        export CGO_ENABLED=0
+        go env
+        ./scripts/build.sh
 
     # Install the cosign tool except on PR
     # https://github.com/sigstore/cosign-installer
@@ -88,7 +86,6 @@ jobs:
           type=semver,pattern={{major}}.{{minor}}.{{patch}}
           type=semver,pattern={{major}}.{{minor}}
           type=semver,pattern={{major}}
-    #            type=raw,value=test,prefix=ci/,enable=true
 
     # Print artifacts and environment variables
     - name: Print env

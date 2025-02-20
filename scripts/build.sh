@@ -47,7 +47,7 @@ build() {
   local binary_path="${binary_dir}/${binary_file}"
   local rm_cmd="rm -f $binary_path"
 
-  local cmd="GOOS=$os GOARCH=$arch go build -a -tags netgo -ldflags=\"-s -w -X main.version=$version\" -o $binary_path $main"
+  local cmd="GOOS=$os GOARCH=$arch go build -a -tags netgo -ldflags=\"-s -w  -extldflags '-static' -X main.version=$version\" -o $binary_path $main"
   echo $rm_cmd
   eval $rm_cmd
   echo $cmd

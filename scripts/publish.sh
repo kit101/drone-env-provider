@@ -3,7 +3,7 @@
 registry=${REGISTRY:-docker.io}
 image=${IMAGE:-kit101z/drone-ext-envs}
 
-tag="$1"
+tag="${1:-$(echo git rev-parse HEAD 2>/dev/null)}"
 
 ocifile=".oci.`date +%s`"
 
@@ -20,6 +20,10 @@ push="0"
 if printf "%s\n" "$@" | grep -q -- '--push'; then
   push="1"
 fi
+withbuild="0"
+if printf "%s\n" "$@" | grep -q -- '--with-build'; then
+  withbuild="1"
+fi
 
 run() {
   local cmd="$1"
@@ -29,7 +33,10 @@ run() {
 }
 
 
-build_cmd="docker buildx b -t $image:$tag --platform linux/amd64,linux/arm64 --no-cache ."
+build_cmd="docker buildx b -t $image:$tag --platform linux/amd64,linux/arm64 ."
+if [ "$withbuild" == "1" ]; then
+  build_cmd="$build_cmd --target with-build"
+fi
 
 #set -xe
 
