@@ -32,15 +32,15 @@ func New(level string) *Log {
 	}
 }
 
-func (l *Log) Debug(args ...interface{})                 { l.internal.Debug(args) }
-func (l *Log) Debugf(format string, args ...interface{}) { l.internal.Debugf(format, args) }
-func (l *Log) Debugln(args ...interface{})               { l.internal.Debugln(args) }
-func (l *Log) Error(args ...interface{})                 { l.internal.Error(args) }
-func (l *Log) Errorf(format string, args ...interface{}) { l.internal.Errorf(format, args) }
-func (l *Log) Errorln(args ...interface{})               { l.internal.Errorln(args) }
-func (l *Log) Info(args ...interface{})                  { l.internal.Info(args) }
-func (l *Log) Infof(format string, args ...interface{})  { l.internal.Infof(format, args) }
-func (l *Log) Infoln(args ...interface{})                { l.internal.Infoln(args) }
-func (l *Log) Warn(args ...interface{})                  { l.internal.Warn(args) }
-func (l *Log) Warnf(format string, args ...interface{})  { l.internal.Warnf(format, args) }
-func (l *Log) Warnln(args ...interface{})                { l.internal.Warnln(args) }
+func (l *Log) Debug(args ...interface{})                 { l.internal.Debug(args...) }
+func (l *Log) Debugf(format string, args ...interface{}) { l.internal.Debugf(format, args...) }
+func (l *Log) Debugln(args ...interface{})               { l.internal.Debugln(args...) }
+func (l *Log) Error(args ...interface{})                 { l.internal.Error(args...) }
+func (l *Log) Errorf(format string, args ...interface{}) { l.internal.Errorf(format, args...) }
+func (l *Log) Errorln(args ...interface{})               { l.internal.Errorln(args...) }
+func (l *Log) Info(args ...interface{})                  { l.internal.Info(args...) }
+func (l *Log) Infof(format string, args ...interface{})  { l.internal.Infof(format, args...) }
+func (l *Log) Infoln(args ...interface{})                { l.internal.Infoln(args...) }
+func (l *Log) Warn(args ...interface{})                  { l.internal.Warn(args...) }
+func (l *Log) Warnf(format string, args ...interface{})  { l.internal.Warnf(format, args...) }
+func (l *Log) Warnln(args ...interface{})                { l.internal.Warnln(args...) }

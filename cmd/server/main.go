@@ -43,44 +43,45 @@ func main() {
 
 	flag.Parse()
 
-	log := loggor.New(logLevel)
+	loggor.Default = loggor.New(logLevel)
 
 	// 检查必要参数
 	if from == "" {
 		from = "file"
 	}
 	if secretKey == "" {
-		log.Warnf("请指定访问密钥 (--secret-key 或 EXT_ENV_SECRET_KEY 环境变量)")
+		loggor.Default.Warnf("请指定访问密钥 (--secret-key 或 EXT_ENV_SECRET_KEY 环境变量)")
 	}
 	if listenPort == "" {
 		listenPort = "8080"
 	}
 	if from == "file" && filePath == "" {
-		log.Errorln("当数据源为文件时，必须指定配置文件路径 (--config-path 或 EXT_ENV_FILE 环境变量)")
+		loggor.Default.Errorln("当数据源为文件时，必须指定配置文件路径 (--file 或 EXT_ENV_FILE 环境变量)")
 		return
 	}
 	if from == "k8s-cm" && (configMap == "") {
-		log.Errorln("当数据源为Kubernetes ConfigMap时，必须指定ConfigMap, e.g. your_ns/your_cm (--configmap 或 EXT_ENV_CONFIGMAP 环境变量)")
+		loggor.Default.Errorln("当数据源为Kubernetes ConfigMap时，必须指定ConfigMap, e.g. your_ns/your_cm (--configmap 或 EXT_ENV_CONFIGMAP 环境变量)")
 		return
 	}
 
 	var r pkg.EnvsReader
 	if from == "file" {
-		r = &reader.FileReader{Filepath: filePath}
+		//r = &reader.fileReader{Filepath: filePath}
+		r = reader.NewFileReader(filePath)
 	} else if from == "k8s-cm" {
 		r = &reader.K8sCMReader{Configmap: configMap}
 	} else {
-		log.Errorln("不合法的--from: ", from)
+		loggor.Default.Errorln("不合法的--from: ", from)
 		return
 	}
-	p := pkg.NewEnvHandler(r, log)
-	handler := environ.Handler(secretKey, p, log)
+	p := pkg.NewEnvHandler(r, loggor.Default)
+	handler := environ.Handler(secretKey, p, loggor.Default)
 	http.HandleFunc("/envs", handler.ServeHTTP)
 
 	// 启动服务器
-	log.Info("服务器启动，监听端口: ", listenPort)
+	loggor.Default.Info("服务器启动，监听端口: ", listenPort)
 	err := http.ListenAndServe(":"+listenPort, nil)
 	if err != nil {
-		log.Errorln("服务器启动失败: %v", err)
+		loggor.Default.Errorln("服务器启动失败: %v", err)
 	}
 }

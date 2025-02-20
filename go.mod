@@ -4,6 +4,7 @@ go 1.23.0
 
 require (
 	github.com/drone/drone-go v1.7.1
+	github.com/duke-git/lancet/v2 v2.3.4
 	github.com/sirupsen/logrus v1.9.3
 	k8s.io/apimachinery v0.32.2
 	k8s.io/client-go v0.32.2
