@@ -57,13 +57,13 @@ build() {
 build_server() {
   local os=$1
   local arch=$2
-  build $os $arch ./cmd/server drone_ext_envs
+  build $os $arch ./cmd/server drone-env-provider
 }
 
 build_client() {
   local os=$1
   local arch=$2
-  build $os $arch ./cmd/client drone_ext_envs_client
+  build $os $arch ./cmd/client drone-env-provider-client
 }
 
 build_client="0"
