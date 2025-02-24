@@ -11,7 +11,7 @@ env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: docker.io
   # github.repository as <account>/<repo>
-  RELEASE_IMAGE_NAME: kit101z/drone-ext-envs
+  RELEASE_IMAGE_NAME: kit101z/drone-env-provider
 
 jobs:
   build:
