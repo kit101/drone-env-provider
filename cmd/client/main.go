@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/drone/drone-go/drone"
 	"github.com/drone/drone-go/plugin/environ"
+	"gopkg.in/yaml.v3"
 	"os"
 )
 
@@ -20,6 +22,9 @@ func main() {
 	skipverify := flag.Bool("skipverify", false, "skipverify")
 
 	repoSlug := flag.String("repo-slug", os.Getenv("REPO_SLUG"), "repo-slug")
+
+	format := flag.String("format", "line", "format: support line, yaml, json. (default: line)")
+	pretty := flag.Bool("pretty", true, "pretty in format json (default: true)")
 
 	flag.Parse()
 
@@ -40,7 +45,46 @@ func main() {
 	if err != nil {
 		fmt.Printf("err:  %v", err)
 	}
+	if *format == "line" {
+		printLine(list)
+	} else if *format == "yaml" {
+		printYaml(list)
+	} else if *format == "json" {
+		printJson(list, *pretty)
+	}
+}
+
+func printLine(list []*environ.Variable) {
 	for _, variable := range list {
 		fmt.Printf("Name: %s\nData:\n%s\nMask: %v\n---\n", variable.Name, variable.Data, variable.Mask)
+	}
+}
+
+func printYaml(list []*environ.Variable) {
+	var node yaml.Node
+	b, _ := yaml.Marshal(list)
+	_ = yaml.Unmarshal(b, &node)
+	plain, err := yaml.Marshal(&node)
+	if err != nil {
+		fmt.Printf("err:  %v, will do printLine.", err)
+		printLine(list)
+		return
+	}
+	fmt.Printf("%s", plain)
+}
+
+func printJson(list []*environ.Variable, pretty bool) {
+	var plain []byte
+	var err error
+	if pretty {
+		plain, err = json.MarshalIndent(list, "", "  ")
+	} else {
+		plain, err = json.Marshal(list)
+	}
+	if err != nil {
+		fmt.Printf("err:  %v, will do printLine.", err)
+		printLine(list)
+	} else {
+		fmt.Printf("%s", plain)
 	}
 }
