@@ -3,11 +3,15 @@ package reader
 import (
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/kit101/drone-ext-envs/pkg"
 	"sigs.k8s.io/yaml"
 )
 
-func read(raw []byte) (*pkg.Envs, []byte, error) {
+const interval = 5 * time.Second
+
+func parse(raw []byte) (*pkg.Envs, []byte, error) {
 	var envs pkg.Envs
 	// 尝试解析为JSON
 	err := json.Unmarshal(raw, &envs)

@@ -1,15 +1,14 @@
 package reader
 
 import (
+	"os"
+	"path/filepath"
+	"time"
+
 	"github.com/duke-git/lancet/v2/fileutil"
 	"github.com/kit101/drone-ext-envs/pkg"
 	"github.com/kit101/drone-ext-envs/pkg/loggor"
-	"os"
-	"path/filepath"
-	time2 "time"
 )
-
-const interval = 5 * time2.Second
 
 type fileReader struct {
 	Filepath string
@@ -20,7 +19,7 @@ type fileReader struct {
 	err      error
 }
 
-func NewFileReader(fp string) *fileReader {
+func FileReader(fp string) pkg.EnvsReader {
 	abs, _ := filepath.Abs(fp)
 	r := &fileReader{
 		Filepath: abs,
@@ -37,22 +36,22 @@ func (r *fileReader) watch() {
 	go func() {
 		for {
 			r.doRead()
-			time2.Sleep(interval)
+			time.Sleep(interval)
 		}
 	}()
 }
 
 func (r *fileReader) doRead() {
-	time, err := fileutil.MTime(r.Filepath)
+	mtime, err := fileutil.MTime(r.Filepath)
 	if err != nil {
 		loggor.Default.Warnf("无法获取文件修改时间: %v", err)
 	}
 	sha, err := fileutil.Sha(r.Filepath, 256)
 	if sha != r.sha {
 		// 记录变更后的sha值
-		r.mtime = time
+		r.mtime = mtime
 		loggor.Default.Infof("file [%s] changed at '%s', sha: '%s' -> '%s'",
-			r.Filepath, time2.Unix(r.mtime, 0), r.sha, sha)
+			r.Filepath, time.Unix(r.mtime, 0), r.sha, sha)
 		r.sha = sha
 
 		// 读取并保存数据
@@ -62,7 +61,7 @@ func (r *fileReader) doRead() {
 			r.raw = raw
 			r.err = err
 		} else {
-			r.envs, r.raw, r.err = read(raw)
+			r.envs, r.raw, r.err = parse(raw)
 		}
 	} else {
 		loggor.Default.Debugf("file [%s] not changed", r.Filepath)

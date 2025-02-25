@@ -3,11 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net/http"
+	"os"
+
 	"github.com/kit101/drone-ext-envs/pkg"
 	"github.com/kit101/drone-ext-envs/pkg/loggor"
 	"github.com/kit101/drone-ext-envs/pkg/reader"
-	"net/http"
-	"os"
 )
 
 // 全局变量
@@ -64,10 +65,15 @@ func main() {
 	}
 
 	var r pkg.EnvsReader
+	var err error
 	if from == "file" {
-		r = reader.NewFileReader(filePath)
+		r = reader.FileReader(filePath)
 	} else if from == "k8s-cm" {
-		r = &reader.K8sCMReader{Configmap: configMap}
+		r, err = reader.K8sCMReader(configMap)
+		if err != nil {
+			loggor.Default.Errorf("create k8sCMReader failure, %w", err)
+			return
+		}
 	} else {
 		loggor.Default.Errorln("不合法的--from: ", from)
 		return
@@ -80,7 +86,7 @@ func main() {
 
 	// 启动服务器
 	loggor.Default.Info("服务器启动，监听端口: ", listenPort)
-	err := http.ListenAndServe(":"+listenPort, nil)
+	err = http.ListenAndServe(":"+listenPort, nil)
 	if err != nil {
 		loggor.Default.Errorln("服务器启动失败: %v", err)
 	}

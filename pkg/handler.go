@@ -2,9 +2,10 @@ package pkg
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/drone/drone-go/plugin/environ"
 	"github.com/drone/drone-go/plugin/logger"
-	"net/http"
 )
 
 type (

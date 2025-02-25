@@ -3,12 +3,13 @@ package pkg
 import (
 	"bytes"
 	"context"
+	"net/http"
+	"strings"
+
 	"github.com/drone/drone-go/plugin/environ"
 	"github.com/drone/drone-go/plugin/logger"
 	"github.com/duke-git/lancet/v2/netutil"
 	"github.com/kit101/drone-ext-envs/pkg/loggor"
-	"net/http"
-	"strings"
 )
 
 type (
@@ -24,11 +25,9 @@ type (
 		Description string                 `json:"description" yaml:"description"`
 		Extra       map[string]interface{} `json:"extra" yaml:"extra"`
 	}
-
 	EnvsReader interface {
 		Read() (*Envs, []byte, error)
 	}
-
 	plugin struct {
 		reader EnvsReader
 		preRaw []byte

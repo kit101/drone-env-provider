@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"os"
+
 	"github.com/drone/drone-go/drone"
 	"github.com/drone/drone-go/plugin/environ"
 	"gopkg.in/yaml.v3"
-	"os"
 )
 
 const (

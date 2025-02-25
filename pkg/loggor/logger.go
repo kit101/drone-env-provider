@@ -2,6 +2,7 @@ package loggor
 
 import (
 	"fmt"
+
 	"github.com/sirupsen/logrus"
 )
 
