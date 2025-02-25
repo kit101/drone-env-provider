@@ -5,7 +5,9 @@ import (
 	"context"
 	"github.com/drone/drone-go/plugin/environ"
 	"github.com/drone/drone-go/plugin/logger"
+	"github.com/duke-git/lancet/v2/netutil"
 	"github.com/kit101/drone-ext-envs/pkg/loggor"
+	"net/http"
 	"strings"
 )
 
@@ -16,31 +18,38 @@ type (
 	}
 	// EnvVar 定义环境变量结构体
 	EnvVar struct {
-		Name  string                 `json:"name" yaml:"name"`
-		Data  string                 `json:"data" yaml:"data"`
-		Mask  bool                   `json:"mask" yaml:"mask"`
-		Extra map[string]interface{} `json:"extra" yaml:"extra"`
+		Name        string                 `json:"name" yaml:"name"`
+		Data        string                 `json:"data" yaml:"data"`
+		Mask        bool                   `json:"mask" yaml:"mask"`
+		Description string                 `json:"description" yaml:"description"`
+		Extra       map[string]interface{} `json:"extra" yaml:"extra"`
 	}
 
 	EnvsReader interface {
 		Read() (*Envs, []byte, error)
 	}
 
-	EnvsHandler struct {
+	plugin struct {
 		reader EnvsReader
 		preRaw []byte
 		log    logger.Logger
 	}
 )
 
-func NewEnvHandler(reader EnvsReader, log logger.Logger) *EnvsHandler {
-	return &EnvsHandler{
+func NewEnvPlugin(reader EnvsReader, log logger.Logger) environ.Plugin {
+	return &plugin{
 		reader: reader,
 		log:    log,
 	}
 }
 
-func (p *EnvsHandler) List(ctx context.Context, r *environ.Request) ([]*environ.Variable, error) {
+func (p *plugin) List(ctx context.Context, r *environ.Request) ([]*environ.Variable, error) {
+	val := ctx.Value("request")
+	var req *http.Request
+	if reqVal, ok := val.(*http.Request); ok {
+		req = reqVal
+	}
+	clientIp := netutil.GetRequestPublicIp(req)
 	envs, raw, err := p.reader.Read()
 	if err != nil {
 		loggor.Default.Errorf("raw: \n%s\n", string(raw))
@@ -49,9 +58,9 @@ func (p *EnvsHandler) List(ctx context.Context, r *environ.Request) ([]*environ.
 
 	if !bytes.Equal(raw, p.preRaw) {
 		if p.preRaw == nil {
-			p.log.Debugln("init envs: \n", string(raw), "\n")
+			p.log.Debugln("init envs: \n%s\n", string(raw))
 		} else {
-			p.log.Debugln("envs changed: \n", string(raw), "\n")
+			p.log.Debugf("envs changed: \n%s\n", string(raw))
 		}
 		p.preRaw = raw
 	}
@@ -63,7 +72,8 @@ func (p *EnvsHandler) List(ctx context.Context, r *environ.Request) ([]*environ.
 		vars = append(vars, Convert(repoEnvs)...)
 	}
 
-	p.log.Info("return envs, repo:", r.Repo.Slug, ", build:", r.Build.Number, ", vars:", varNamesStr(vars))
+	p.log.Infof("remoteAddr: %s, return envs, repo: %s, build: %d, vars: %s",
+		clientIp, r.Repo.Slug, r.Build.Number, varNamesStr(vars))
 
 	return vars, nil
 }

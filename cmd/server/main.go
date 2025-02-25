@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/drone/drone-go/plugin/environ"
 	"github.com/kit101/drone-ext-envs/pkg"
 	"github.com/kit101/drone-ext-envs/pkg/loggor"
 	"github.com/kit101/drone-ext-envs/pkg/reader"
@@ -66,7 +65,6 @@ func main() {
 
 	var r pkg.EnvsReader
 	if from == "file" {
-		//r = &reader.fileReader{Filepath: filePath}
 		r = reader.NewFileReader(filePath)
 	} else if from == "k8s-cm" {
 		r = &reader.K8sCMReader{Configmap: configMap}
@@ -74,9 +72,11 @@ func main() {
 		loggor.Default.Errorln("不合法的--from: ", from)
 		return
 	}
-	p := pkg.NewEnvHandler(r, loggor.Default)
-	handler := environ.Handler(secretKey, p, loggor.Default)
+	p := pkg.NewEnvPlugin(r, loggor.Default)
+	handler := pkg.Handler(secretKey, p, loggor.Default)
 	http.HandleFunc("/envs", handler.ServeHTTP)
+
+	http.HandleFunc("/healthy", healthy)
 
 	// 启动服务器
 	loggor.Default.Info("服务器启动，监听端口: ", listenPort)
@@ -84,4 +84,8 @@ func main() {
 	if err != nil {
 		loggor.Default.Errorln("服务器启动失败: %v", err)
 	}
+}
+
+func healthy(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "ok")
 }
